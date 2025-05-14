@@ -1,0 +1,5 @@
+train: C:\Users\mrosk\OneDrive\Desktop\emotion-detection-yolo\data\processed\train\images
+val:  C:\Users\mrosk\OneDrive\Desktop\emotion-detection-yolo\data\processed\valid\images
+test:  C:\Users\mrosk\OneDrive\Desktop\emotion-detection-yolo\data\processed\test\images
+nc: 9
+names: ['angry', 'contempt', 'disgust', 'fear', 'happy', 'natural', 'sad', 'sleepy', 'surprised']
