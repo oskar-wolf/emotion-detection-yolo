@@ -1,79 +1,123 @@
-# Data Project Template
+# Emotion Detection with YOLOv8
 
-<a target="_blank" href="https://datalumina.com/">
-    <img src="https://img.shields.io/badge/Datalumina-Project%20Template-2856f7" alt="Datalumina Project" />
-</a>
+A simple, end-to-end pipeline for detecting a person’s emotional state in images using Ultralytics YOLOv8. Covers raw data audit, preprocessing, training, detailed evaluation, and an inference demo—organized into Jupyter notebooks.
 
-## Cookiecutter Data Science
-This project template is a simplified version of the [Cookiecutter Data Science](https://cookiecutter-data-science.drivendata.org) template, created to suit the needs of Datalumina and made available as a GitHub template.
+---
 
-## Adjusting .gitignore
-
-Ensure you adjust the `.gitignore` file according to your project needs. For example, since this is a template, the `/data/` folder is commented out and data will not be exlucded from source control:
-
-```plaintext
-# exclude data from source control by default
-# /data/
-```
-
-Typically, you want to exclude this folder if it contains either sensitive data that you do not want to add to version control or large files.
-
-## Duplicating the .env File
-To set up your environment variables, you need to duplicate the `.env.example` file and rename it to `.env`. You can do this manually or using the following terminal command:
-
-```bash
-cp .env.example .env # Linux, macOS, Git Bash, WSL
-copy .env.example .env # Windows Command Prompt
-```
-
-This command creates a copy of `.env.example` and names it `.env`, allowing you to configure your environment variables specific to your setup.
-
-
-## Project Organization
-
-```
-├── LICENSE            <- Open-source license if one is chosen
-├── README.md          <- The top-level README for developers using this project
-├── data
-│   ├── external       <- Data from third party sources
-│   ├── interim        <- Intermediate data that has been transformed
-│   ├── processed      <- The final, canonical data sets for modeling
-│   └── raw            <- The original, immutable data dump
+## 📁 Repository Structure
+emotion-detection-yolo/
+├── data/
+│ ├── raw/ # Original train/valid/test splits with images & labels
+│ ├── interim/ # Face-cropped 640×640 images & labels after audit
+│ └── processed/ # Final, model-ready images & labels
 │
-├── models             <- Trained and serialized models, model predictions, or model summaries
+├── demo_images/ # Your own 9 example selfies for inference demo
 │
-├── notebooks          <- Jupyter notebooks. Naming convention is a number (for ordering),
-│                         the creator's initials, and a short `-` delimited description, e.g.
-│                         `1.0-jqp-initial-data-exploration`
+├── models/
+│ └── emotion_detector/
+│ └── weights/ # best.pt & last.pt checkpoints from training
 │
-├── references         <- Data dictionaries, manuals, and all other explanatory materials
+├── runs/
+│ ├── detect/ # detection-task validation outputs
+│ └── inference_demo/ # saved demo inference images & JSON
 │
-├── reports            <- Generated analysis as HTML, PDF, LaTeX, etc.
-│   └── figures        <- Generated graphics and figures to be used in reporting
+├── notebooks/ # Phase-by-phase Jupyter notebooks
+│ ├── 1_data_audit.ipynb
+│ ├── 2_preprocessing.ipynb
+│ ├── 3_train_and_val.ipynb
+│ ├── 4_evaluate.ipynb
+│ └── 5_inference_demo.ipynb
 │
-├── requirements.txt   <- The requirements file for reproducing the analysis environment, e.g.
-│                         generated with `pip freeze > requirements.txt`
-│
-└── src                         <- Source code for this project
-    │
-    ├── __init__.py             <- Makes src a Python module
-    │
-    ├── config.py               <- Store useful variables and configuration
-    │
-    ├── dataset.py              <- Scripts to download or generate data
-    │
-    ├── features.py             <- Code to create features for modeling
-    │
-    │    
-    ├── modeling                
-    │   ├── __init__.py 
-    │   ├── predict.py          <- Code to run model inference with trained models          
-    │   └── train.py            <- Code to train models
-    │
-    ├── plots.py                <- Code to create visualizations 
-    │
-    └── services                <- Service classes to connect with external platforms, tools, or APIs
-        └── __init__.py 
-```
+├── data.yaml # YOLOv8 dataset config (train/val/test paths + class names)
+├── requirements.txt # pip install -r requirements.txt
+├── yolov8n.pt # pretrained YOLOv8n backbone
+├── LICENSE # MIT
+└── README.md # this file
 
---------
+
+---
+
+## 🚀 Quickstart
+
+1. **Clone & install**  
+   ```bash
+   git clone https://github.com/yourname/emotion-detection-yolo.git
+   cd emotion-detection-yolo
+   pip install -r requirements.txt
+
+Prepare your data
+
+Download the “8 Facial Expressions for YOLO” dataset from Kaggle/Roboflow
+
+Place the train/, valid/, and test/ folders under data/raw/
+
+Run the notebooks
+Launch Jupyter in the project root:
+
+Then execute, in order:
+
+notebooks/1_data_audit.ipynb
+
+notebooks/2_preprocessing.ipynb
+
+notebooks/3_train_and_val.ipynb
+
+notebooks/4_evaluate.ipynb
+
+notebooks/5_inference_demo.ipynb
+
+🗂️ Phase Overviews
+1. Data Audit
+Detect & crop the primary face in each image using OpenCV Haar cascades
+
+Resize crops to 640×640 and save under data/interim/<split>/images
+
+Copy matching labels to data/interim/<split>/labels
+
+Summarize how many images per split were kept
+
+2. Preprocessing
+Load interim crops
+
+Normalize pixels to [0,1] and convert any grayscale → RGB
+
+Save final images under data/processed/<split>/images and copy labels
+
+3. Training & Validation
+Train a YOLOv8n model on the processed train/ and valid/ splits
+
+Monitor box loss, classification loss, mAP@0.5 and mAP@0.5:0.95
+
+Save best checkpoint to models/emotion_detector/weights/best.pt
+
+4. Detailed Evaluation
+Run model.val() on the held-out test split
+
+Print overall and per-class mAP, confusion matrix, precision/recall/F1
+
+5. Inference Demo
+Place your own 9 selfies (one per emotion) in demo_images/
+
+Run inference, display the top-2 predictions per image, and save to runs/inference_demo/
+
+📊 Results
+AP50: ~72 %
+
+mAP50–95: ~52 %
+
+Single-label accuracy (per-image): ~80 %
+
+Per-class F1-score range:
+
+Happy: ~0.94
+
+Neutral: ~0.65
+
+⚙️ Configuration
+data.yaml defines your dataset paths and class names.
+
+Adjust training hyperparameters directly in notebooks/3_train_and_val.ipynb or supply a custom hyp_custom.yaml to model.train().
+
+📜 License
+This project is released under the MIT License.
+See LICENSE for details.
