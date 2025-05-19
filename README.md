@@ -116,5 +116,4 @@ notebooks/5_inference_demo.ipynb
 - **`data.yaml`** defines dataset paths and class names.
 - **`environment.yml`** pins Python, PyTorch, OpenCV, Ultralytics YOLOv8, and other dependencies.
 
-To tweak training hyperparameters, edit `notebooks/3_train_and_val.ipynb` or supply a custom `hyp_custom.yaml`.
 ```
