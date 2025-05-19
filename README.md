@@ -5,119 +5,116 @@ A simple, end-to-end pipeline for detecting a person’s emotional state in imag
 ---
 
 ## 📁 Repository Structure
+
+```text
 emotion-detection-yolo/
 ├── data/
-│ ├── raw/ # Original train/valid/test splits with images & labels
-│ ├── interim/ # Face-cropped 640×640 images & labels after audit
-│ └── processed/ # Final, model-ready images & labels
+│   ├── raw/         # Original train/valid/test splits (images + YOLO .txt labels)
+│   ├── interim/     # 640×640 face crops + labels after data audit
+│   └── processed/   # Final model-ready images + labels
 │
-├── demo_images/ # Your own 9 example selfies for inference demo
+├── demo_images/     # Your 9 selfies for the inference demo
 │
 ├── models/
-│ └── emotion_detector/
-│ └── weights/ # best.pt & last.pt checkpoints from training
+│   └── emotion_detector/
+│       └── weights/ # best.pt & last.pt checkpoints
 │
 ├── runs/
-│ ├── detect/ # detection-task validation outputs
-│ └── inference_demo/ # saved demo inference images & JSON
+│   ├── detect/          # validation outputs & metrics
+│   └── inference_demo/  # saved inference visuals & JSON
 │
-├── notebooks/ # Phase-by-phase Jupyter notebooks
-│ ├── 1_data_audit.ipynb
-│ ├── 2_preprocessing.ipynb
-│ ├── 3_train_and_val.ipynb
-│ ├── 4_evaluate.ipynb
-│ └── 5_inference_demo.ipynb
+├── notebooks/        # Phase-by-phase Jupyter notebooks
+│   ├── 1_data_audit.ipynb
+│   ├── 2_preprocessing.ipynb
+│   ├── 3_train_and_val.ipynb
+│   ├── 4_evaluate.ipynb
+│   └── 5_inference_demo.ipynb
 │
-├── data.yaml # YOLOv8 dataset config (train/val/test paths + class names)
-├── requirements.txt # pip install -r requirements.txt
-├── yolov8n.pt # pretrained YOLOv8n backbone
-├── LICENSE # MIT
-└── README.md # this file
+├── data.yaml         # YOLOv8 dataset config (train/val/test paths + class names)
+├── environment.yml   # Conda environment spec (yolo38)
+├── LICENSE           # MIT
+└── README.md         # this file
 
+```markdown
+# Quickstart
 
----
+## Clone & enter the repo
 
-## 🚀 Quickstart
+```bash
+git clone https://github.com/oskar-wolf/emotion-detection-yolo.git
+cd emotion-detection-yolo
+```
 
-1. **Clone & install**  
-   ```bash
-   git clone https://github.com/yourname/emotion-detection-yolo.git
-   cd emotion-detection-yolo
-   pip install -r requirements.txt
+## Create & activate the Conda environment
 
-Prepare your data
+```bash
+conda env create -f environment.yml
+conda activate yolo38
+```
 
-Download the “8 Facial Expressions for YOLO” dataset from Kaggle/Roboflow
+## Prepare your data
 
-Place the train/, valid/, and test/ folders under data/raw/
+- Download the “9 Facial Expressions for YOLO” dataset from Kaggle or Roboflow.
+- Place `train/`, `valid/`, and `test/` folders under `data/raw/`.
 
-Run the notebooks
+## Run the notebooks
+
 Launch Jupyter in the project root:
+
+```bash
+jupyter notebook
+```
 
 Then execute, in order:
 
+```text
 notebooks/1_data_audit.ipynb
-
 notebooks/2_preprocessing.ipynb
-
 notebooks/3_train_and_val.ipynb
-
 notebooks/4_evaluate.ipynb
-
 notebooks/5_inference_demo.ipynb
+```
 
-🗂️ Phase Overviews
-1. Data Audit
-Detect & crop the primary face in each image using OpenCV Haar cascades
+---
 
-Resize crops to 640×640 and save under data/interim/<split>/images
+## 🗂️ Phase Overviews
 
-Copy matching labels to data/interim/<split>/labels
+### 1. Data Audit
 
-Summarize how many images per split were kept
+- Detect & crop the primary face in each image using OpenCV Haar cascades.
+- Resize to 640×640 and save under `data/interim/<split>/images`.
+- Copy matching YOLO labels to `data/interim/<split>/labels`.
+- Summarize kept images per split.
 
-2. Preprocessing
-Load interim crops
+### 2. Preprocessing
 
-Normalize pixels to [0,1] and convert any grayscale → RGB
+- Load interim face crops.
+- Normalize pixel values to `[0,1]` and convert grayscale → RGB.
+- Save to `data/processed/<split>/images` and copy labels.
 
-Save final images under data/processed/<split>/images and copy labels
+### 3. Training & Validation
 
-3. Training & Validation
-Train a YOLOv8n model on the processed train/ and valid/ splits
+- Fine-tune YOLOv8n on processed `train/` + validate on `valid/`.
+- Monitor box/cls/DFL losses, mAP@0.5, mAP@0.5–0.95.
+- Save best checkpoint to `models/emotion_detector/weights/best.pt`.
 
-Monitor box loss, classification loss, mAP@0.5 and mAP@0.5:0.95
+### 4. Detailed Evaluation
 
-Save best checkpoint to models/emotion_detector/weights/best.pt
+- Run `model.val()` on the held-out test split.
+- Generate overall & per-class mAP, confusion matrix, PR/F1 curves.
 
-4. Detailed Evaluation
-Run model.val() on the held-out test split
+### 5. Inference Demo
 
-Print overall and per-class mAP, confusion matrix, precision/recall/F1
+- Place your own nine selfies in `demo_images/`.
+- Run inference, display top-2 predictions per image.
+- Save outputs to `runs/inference_demo/`.
 
-5. Inference Demo
-Place your own 9 selfies (one per emotion) in demo_images/
+---
 
-Run inference, display the top-2 predictions per image, and save to runs/inference_demo/
+## ⚙️ Configuration
 
-📊 Results
-AP50: ~72 %
+- **`data.yaml`** defines dataset paths and class names.
+- **`environment.yml`** pins Python, PyTorch, OpenCV, Ultralytics YOLOv8, and other dependencies.
 
-mAP50–95: ~52 %
-
-Single-label accuracy (per-image): ~80 %
-
-Per-class F1-score range:
-
-Happy: ~0.94
-
-Neutral: ~0.65
-
-⚙️ Configuration
-data.yaml defines your dataset paths and class names.
-
-Adjust training hyperparameters directly in notebooks/3_train_and_val.ipynb or supply a custom hyp_custom.yaml to model.train().
-
-📜 License
-This project is released under the MIT License.
-See LICENSE for details.
+To tweak training hyperparameters, edit `notebooks/3_train_and_val.ipynb` or supply a custom `hyp_custom.yaml`.
+```

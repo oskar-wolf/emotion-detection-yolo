@@ -1,0 +1,23 @@
+name: yolo38
+channels:
+  - conda-forge
+  - pytorch
+  - defaults
+dependencies:
+  - python=3.8
+  - opencv
+  - ca-certificates
+  - openssl
+  - ipykernel
+  - cudatoolkit
+  - pytorch-cuda=12.1
+  - pytorch
+  - torchvision
+  - torchaudio
+  - matplotlib
+  - certifi
+  - conda-forge::prettytable
+  - conda-forge::ultralytics
+  - charset-normalizer=2.1.1
+  - anaconda::scikit-learn
+prefix: C:\Users\mrosk\anaconda3\envs\yolo38
